@@ -18,11 +18,6 @@ fun Route.demoRoutes() {
     }
 
     post("/demo/validation") {
-        val request = call.receive<CreatePostPayload>()
-        call.respond(request)
-    }
-
-    post("/demo/validation/custom") {
         val validatedPost = CreatePostRequest.receive(call)
         call.respond(validatedPost)
     }
