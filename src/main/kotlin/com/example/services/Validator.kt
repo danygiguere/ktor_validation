@@ -1,62 +1,39 @@
 package com.example.services
 
-class Validator {
+import com.example.rules.MaxLength
+import com.example.rules.MinLength
+import com.example.rules.Required
 
-    companion object {
+object Validator {
 
-        fun splitString(str: String): List<String> =
-            str.split(":").takeIf { ":" in str } ?: listOf(str, "0")
+    private fun splitString(str: String): List<String> =
+        str.split(":").takeIf { ":" in str } ?: listOf(str, "0")
 
-        fun check(fieldNames: Array<String>, field: String, rules: Array<String>, locale: String): MutableList<String> {
-            val array = mutableListOf<String>()
-            var fieldName = "fieldName"
+    private fun localizeFieldName(fieldNames: Array<String>, locale: I18n.Locale): String {
+        return fieldNames.map { splitString(it) }
+            .firstOrNull { it[0] == locale.shortName }
+            ?.get(1) ?: "fieldName"
+    }
 
-            for (name in fieldNames) {
-                val fieldNameKeyValue = splitString(name)
-                if(fieldNameKeyValue[0] == locale) {
-                    fieldName = fieldNameKeyValue[1]
-                }
+    private fun getDefaultFieldName(fieldNames: Array<String>): String {
+        return fieldNames.firstOrNull()?.substringBefore(":") ?: "fieldName"
+    }
+
+    fun check(fieldNames: Array<String>, field: String, rules: Array<String>, locale: I18n.Locale): MutableList<String> {
+        val array = mutableListOf<String>()
+        val fieldName = localizeFieldName(fieldNames, locale)
+
+        for (rule in rules) {
+            val (key, value) = splitString(rule).let { it[0] to it[1].toInt() }
+
+            when (key) {
+                "required" -> Required(field, value, locale, fieldName, array).check()
+                "minLength" -> MinLength(field, value, locale, fieldName, array).check()
+                "maxLength" -> MaxLength(field, value, locale, fieldName, array).check()
             }
 
-            for (rule in rules) {
-                val ruleKeyValue = splitString(rule)
-                val key = ruleKeyValue[0]
-                val value = ruleKeyValue[1].toInt()
-
-                when (key) {
-                    "required" -> {
-                        if (field.isEmpty()) {
-                            if (locale === "en") {
-                                array.add("The $fieldName field is required")
-                            } else {
-                                array.add("Le champ $fieldName est requis")
-                            }
-                        }
-                    }
-                    "minLength" -> {
-                        if(field.length < value) {
-                            if(locale === "en") {
-                                array.add("The $fieldName field must contain at least $value characters")
-                            } else {
-                                array.add("Le champ $fieldName doit contenir au moins $value caractères")
-                            }
-                        }
-                    }
-                    "maxLength" -> {
-                        if(field.length > value) {
-                            if(locale === "en") {
-                                array.add("The $fieldName field must contain less than $value characters")
-                            } else {
-                                array.add("Le champ $fieldName doit contenir moins de $value caractères")
-                            }
-                        }
-                    }
-                }
-
-            }
-            return array
         }
-
+        return array
     }
 
 }

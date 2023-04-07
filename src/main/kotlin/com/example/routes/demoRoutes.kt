@@ -1,5 +1,6 @@
 package com.example.routes
 
+import com.example.requests.CreatePostPayload
 import com.example.requests.CreatePostRequest
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -17,8 +18,13 @@ fun Route.demoRoutes() {
     }
 
     post("/demo/validation") {
-        val request = call.receive<CreatePostRequest>()
+        val request = call.receive<CreatePostPayload>()
         call.respond(request)
+    }
+
+    post("/demo/validation/custom") {
+        val validatedPost = CreatePostRequest.receive(call)
+        call.respond(validatedPost)
     }
 
 }
