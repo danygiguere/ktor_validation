@@ -4,7 +4,7 @@ import com.example.rules.MaxLength
 import com.example.rules.MinLength
 import com.example.rules.Required
 
-object Validator {
+class Validator {
 
     private fun splitString(str: String): List<String> =
         str.split(":").takeIf { ":" in str } ?: listOf(str, "0")

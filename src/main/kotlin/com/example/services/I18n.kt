@@ -3,7 +3,7 @@ package com.example.services
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 
-object I18n {
+class I18n {
 
     enum class Locale(val shortName: String) {
         ENGLISH("en"),

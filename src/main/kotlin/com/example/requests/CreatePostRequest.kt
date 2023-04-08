@@ -13,18 +13,18 @@ data class CreatePostPayload(
     val title: String? = null,
     val body: String? = null)
 
-object CreatePostRequest {
+class CreatePostRequest {
 
     private fun authorize(call: ApplicationCall, locale: I18n.Locale) {
         // for instance: if user.id != to post.user_id, then throw 403, with localized message
     }
 
     private fun validate(payload:CreatePostPayload, locale: I18n.Locale): CreatePostPayload {
-
+        val validator = Validator()
         val errors = mutableMapOf<String, List<String>>()
 
         val titleArray = payload.title?.let {
-            Validator.check(
+            validator.check(
                 arrayOf("en:title", "fr:titre"),
                 it,
                 arrayOf("minLength:2", "maxLength:4"),
@@ -32,7 +32,7 @@ object CreatePostRequest {
         }
 
         val bodyArray = payload.body?.let {
-            Validator.check(
+            validator.check(
                 arrayOf("en:body", "fr:contenu"),
                 it,
                 arrayOf("minLength:2", "maxLength:4"),
@@ -53,7 +53,7 @@ object CreatePostRequest {
 
     suspend fun receive(call: ApplicationCall): CreatePostPayload {
         val payload = call.receive<CreatePostPayload>()
-        val locale = I18n.getLocale(call)
+        val locale = I18n().getLocale(call)
         this.authorize(call, locale)
         return this.validate(payload, locale)
     }
